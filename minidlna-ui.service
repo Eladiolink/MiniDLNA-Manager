@@ -1,0 +1,18 @@
+[Unit]
+Description=MiniDLNA Web Management UI
+After=network.target minidlna.service
+Wants=minidlna.service
+
+[Service]
+Type=simple
+User=zoro
+WorkingDirectory=/home/zoro/Projetos/DLNA-UI
+ExecStart=/home/zoro/Projetos/DLNA-UI/venv/bin/python /home/zoro/Projetos/DLNA-UI/app.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+Environment=PORT=5050
+Environment=HOST=127.0.0.1
+
+[Install]
+WantedBy=multi-user.target

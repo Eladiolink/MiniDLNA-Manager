@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiniDLNA Manager</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="theme-dark">
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 11a9 9 0 0 1 9 9"></path>
+              <path d="M4 4a16 16 0 0 1 16 16"></path>
+              <circle cx="5" cy="19" r="1"></circle>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h2>MiniDLNA</h2>
+            <span class="badge-version">v1.3 Web UI</span>
+          </div>
+        </div>
+
+        <!-- Service Quick Status Badge -->
+        <div class="service-pill" id="sidebar-status-pill">
+          <span class="status-dot inactive" id="sidebar-status-dot"></span>
+          <span class="status-label" id="sidebar-status-text">Verificando...</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <a href="#dashboard" class="nav-item active" data-tab="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Visão Geral</span>
+        </a>
+        <a href="#folders" class="nav-item" data-tab="folders">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span>Pastas de Mídia</span>
+          <span class="nav-count" id="nav-folders-count">0</span>
+        </a>
+        <a href="#settings" class="nav-item" data-tab="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span>Configurações</span>
+        </a>
+        <a href="#control" class="nav-item" data-tab="control">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span>Controle de Serviço</span>
+        </a>
+        <a href="#logs" class="nav-item" data-tab="logs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="4 17 10 11 4 5"></polyline>
+            <line x1="12" y1="19" x2="20" y2="19"></line>
+          </svg>
+          <span>Logs do Sistema</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Quick Control Actions -->
+      <div class="sidebar-quick-actions">
+        <span class="quick-title">Ações Rápidas</span>
+        <div class="quick-buttons">
+          <button type="button" class="btn-action-sm btn-start" id="quick-btn-start" title="Iniciar MiniDLNA">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Iniciar
+          </button>
+          <button type="button" class="btn-action-sm btn-restart" id="quick-btn-restart" title="Reiniciar Serviço">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path></svg>
+            Reiniciar
+          </button>
+          <button type="button" class="btn-action-sm btn-stop" id="quick-btn-stop" title="Parar Serviço">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>
+            Parar
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="host-info">
+          <span>Servidor Local</span>
+          <code id="sidebar-port-preview">127.0.0.1:8200</code>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 id="page-title">Visão Geral</h1>
+          <span class="friendly-server-name" id="topbar-server-name">MiniDLNA Server</span>
+        </div>
+        <div class="topbar-right">
+          <label class="auto-refresh-toggle">
+            <input type="checkbox" id="auto-refresh-check" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Atualização automática</span>
+          </label>
+          <button type="button" class="btn btn-secondary btn-icon" id="btn-manual-refresh" title="Atualizar dados agora">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path>
+            </svg>
+            <span>Atualizar</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <div class="views-wrapper">
+
+        <!-- ==================== TAB: DASHBOARD ==================== -->
+        <section class="tab-pane active" id="tab-dashboard">
+          <!-- Permission Warning Box -->
+          <div class="permission-warning-card" id="permission-warning-box" style="display: none;">
+            <div class="warning-card-header">
+              <div class="warning-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              </div>
+              <div class="warning-text">
+                <h4>Atenção: Pastas de Mídia Inacessíveis (Permission Denied)</h4>
+                <p id="permission-warning-text">O MiniDLNA não consegue ler pastas no diretório pessoal (<code>/home</code>). No Arch Linux/CachyOS, o serviço vem bloqueado por padrão (<code>ProtectHome=yes</code>) e sem permissão de acesso.</p>
+              </div>
+              <button type="button" class="btn-dismiss-warning" id="btn-dismiss-permission-warning" title="Fechar este aviso">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </button>
+            </div>
+            <div class="warning-code-box">
+              <span>Execute este comando no seu terminal para liberar o acesso e reindexar:</span>
+              <pre><code id="permission-fix-code">sudo mkdir -p /etc/systemd/system/minidlna.service.d && sudo tee /etc/systemd/system/minidlna.service.d/override.conf << 'EOF'
+[Service]
+ProtectHome=read-only
+EOF
+sudo systemctl daemon-reload
+sudo setfacl -m u:minidlna:x $HOME
+sudo setfacl -R -m u:minidlna:rx "$HOME/Downloads"
+sudo systemctl restart minidlna</code></pre>
+            </div>
+          </div>
+
+          <!-- Metric Cards Grid -->
+          <div class="metrics-grid">
+            <!-- Card: Service Status -->
+            <div class="metric-card card-status">
+              <div class="card-icon status-bg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+              </div>
+              <div class="card-details">
+                <span class="card-label">Status do Serviço</span>
+                <div class="status-indicator-wrap">
+                  <span class="card-value status-text" id="metric-service-status">Inativo</span>
+                  <span class="status-pill-small" id="metric-boot-status">Boot: Desabilitado</span>
+                </div>
+                <span class="card-subtext" id="metric-pid-subtext">PID: --</span>
+              </div>
+            </div>
+
+            <!-- Card: HTTP Port -->
+            <div class="metric-card card-port">
+              <div class="card-icon port-bg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+              </div>
+              <div class="card-details">
+                <span class="card-label">Porta DLNA / HTTP</span>
+                <span class="card-value" id="metric-port">8200</span>
+                <a href="http://127.0.0.1:8200" target="_blank" class="card-link" id="metric-port-link">Abrir status nativo &rarr;</a>
+              </div>
+            </div>
+
+            <!-- Card: Audio Files -->
+            <div class="metric-card card-audio">
+              <div class="card-icon audio-bg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 18V5l12-2v13"></path>
+                  <circle cx="6" cy="18" r="3"></circle>
+                  <circle cx="18" cy="16" r="3"></circle>
+                </svg>
+              </div>
+              <div class="card-details">
+                <span class="card-label">Músicas & Áudio</span>
+                <span class="card-value" id="metric-audio-count">0</span>
+                <span class="card-subtext">Arquivos indexados</span>
+              </div>
+            </div>
+
+            <!-- Card: Video Files -->
+            <div class="metric-card card-video">
+              <div class="card-icon video-bg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                  <line x1="7" y1="2" x2="7" y2="22"></line>
+                  <line x1="17" y1="2" x2="17" y2="22"></line>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <line x1="2" y1="7" x2="7" y2="7"></line>
+                  <line x1="2" y1="17" x2="7" y2="17"></line>
+                  <line x1="17" y1="17" x2="22" y2="17"></line>
+                  <line x1="17" y1="7" x2="22" y2="7"></line>
+                </svg>
+              </div>
+              <div class="card-details">
+                <span class="card-label">Filmes & Vídeos</span>
+                <span class="card-value" id="metric-video-count">0</span>
+                <span class="card-subtext">Arquivos indexados</span>
+              </div>
+            </div>
+
+            <!-- Card: Image Files -->
+            <div class="metric-card card-images">
+              <div class="card-icon image-bg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <div class="card-details">
+                <span class="card-label">Fotos & Imagens</span>
+                <span class="card-value" id="metric-image-count">0</span>
+                <span class="card-subtext">Arquivos indexados</span>
+              </div>
+            </div>
+
+            <!-- Card: Clients Connected -->
+            <div class="metric-card card-clients">
+              <div class="card-icon client-bg">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+              <div class="card-details">
+                <span class="card-label">Dispositivos Conectados</span>
+                <span class="card-value" id="metric-clients-count">0</span>
+                <span class="card-subtext">Aparelhos na rede</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Connected Clients Section -->
+          <div class="content-panel">
+            <div class="panel-header">
+              <div class="panel-title-group">
+                <h3>Dispositivos e Clientes Conectados</h3>
+                <p class="panel-subtitle">Smart TVs, reprodutores e aplicativos consumindo mídia via DLNA/UPnP.</p>
+              </div>
+              <span class="badge" id="client-count-badge">0 conectados</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table" id="clients-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Tipo do Cliente</th>
+                    <th>Endereço IP</th>
+                    <th>Endereço MAC</th>
+                    <th>Conexões Ativas</th>
+                  </tr>
+                </thead>
+                <tbody id="clients-table-body">
+                  <tr class="empty-row">
+                    <td colspan="5">Nenhum cliente DLNA conectado no momento.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Quick Media Folders & Logs Grid -->
+          <div class="two-columns-grid">
+            <!-- Media Folders Summary -->
+            <div class="content-panel">
+              <div class="panel-header">
+                <h3>Pastas Compartilhadas</h3>
+                <a href="#folders" class="panel-action-link" data-tab-switch="folders">Gerenciar pastas &rarr;</a>
+              </div>
+              <div class="mini-folders-list" id="mini-folders-list">
+                <div class="empty-state-sm">Carregando pastas de mídia...</div>
+              </div>
+            </div>
+
+            <!-- Terminal Preview -->
+            <div class="content-panel">
+              <div class="panel-header">
+                <h3>Últimos Registros (Logs)</h3>
+                <a href="#logs" class="panel-action-link" data-tab-switch="logs">Ver tela cheia &rarr;</a>
+              </div>
+              <div class="mini-terminal" id="mini-terminal-preview">
+                <code>Carregando registros do MiniDLNA...</code>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB: FOLDERS ==================== -->
+        <section class="tab-pane" id="tab-folders">
+          <div class="content-panel">
+            <div class="panel-header">
+              <div>
+                <h3>Gerenciar Pastas de Mídia</h3>
+                <p class="panel-subtitle">Diretórios locais escaneados pelo MiniDLNA. Especifique tipos para indexação otimizada.</p>
+              </div>
+              <button type="button" class="btn btn-primary" id="btn-open-add-folder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Adicionar Pasta</span>
+              </button>
+            </div>
+
+            <!-- Add Folder Form Box (Collapsible / Toggleable) -->
+            <div class="folder-form-card" id="add-folder-box" style="display: none;">
+              <h4>Adicionar Novo Diretório</h4>
+              <div class="form-row">
+                <div class="form-group flex-2">
+                  <label for="new-folder-path">Caminho da Pasta no Sistema</label>
+                  <div class="input-with-action">
+                    <input type="text" id="new-folder-path" class="input-field" placeholder="/home/usuario/Videos ou /media/HD_Externo">
+                    <button type="button" class="btn btn-secondary" id="btn-browse-folder" title="Navegar no Sistema de Arquivos">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                      </svg>
+                      <span>Procurar...</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-group flex-1">
+                  <label for="new-folder-type">Tipo de Conteúdo</label>
+                  <select id="new-folder-type" class="select-field">
+                    <option value="ALL">🎬 Geral (Vídeos, Músicas e Fotos)</option>
+                    <option value="V">🎥 Apenas Vídeos (V)</option>
+                    <option value="A">🎵 Apenas Músicas / Áudio (A)</option>
+                    <option value="P">🖼️ Apenas Fotos / Imagens (P)</option>
+                    <option value="PV">📷 Fotos e Vídeos (PV)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-actions-right">
+                <button type="button" class="btn btn-secondary" id="btn-cancel-add-folder">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btn-confirm-add-folder">Adicionar à Lista</button>
+              </div>
+            </div>
+
+            <!-- Folders List Table -->
+            <div class="folders-list" id="folders-container">
+              <!-- Dynamically populated -->
+            </div>
+
+            <div class="panel-footer-actions">
+              <button type="button" class="btn btn-primary" id="btn-save-folders">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                  <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                <span>Salvar Configuração de Pastas</span>
+              </button>
+              <button type="button" class="btn btn-secondary" id="btn-save-and-reindex-folders">
+                <span>Salvar e Forçar Reindexação</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB: SETTINGS ==================== -->
+        <section class="tab-pane" id="tab-settings">
+          <form id="settings-form">
+            <!-- Group: Básico & Rede -->
+            <div class="content-panel">
+              <div class="panel-header">
+                <h3>Geral e Rede</h3>
+                <p class="panel-subtitle">Identificação do servidor e parâmetros de rede local.</p>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="cfg-friendly_name">Nome Amigável do Servidor (Friendly Name)</label>
+                  <input type="text" id="cfg-friendly_name" class="input-field" placeholder="Ex: Meu DLNA Sala">
+                  <small class="helper-text">Nome que aparecerá na sua Smart TV e clientes UPnP.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-port">Porta HTTP do Serviço</label>
+                  <input type="number" id="cfg-port" min="1024" max="65535" class="input-field" placeholder="8200">
+                  <small class="helper-text">Padrão: 8200. Será verificado se a porta está livre.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-network_interface">Interface de Rede (Opcional)</label>
+                  <input type="text" id="cfg-network_interface" class="input-field" placeholder="Ex: eth0, wlan0 (deixe vazio para todas)">
+                  <small class="helper-text">Deixe em branco para permitir conexões em todas as interfaces ativas.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-presentation_url">URL de Apresentação</label>
+                  <input type="text" id="cfg-presentation_url" class="input-field" placeholder="http://192.168.1.x:8200">
+                  <small class="helper-text">Página de apresentação exibida ao clicar nas propriedades do dispositivo.</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Group: Monitoramento e Cache -->
+            <div class="content-panel">
+              <div class="panel-header">
+                <h3>Indexação, Monitoramento e Armazenamento</h3>
+                <p class="panel-subtitle">Como o MiniDLNA descobre novos arquivos e onde armazena o banco de dados.</p>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="cfg-inotify">
+                    <span class="custom-checkbox"></span>
+                    <span>Monitoramento Automático em Tempo Real (inotify)</span>
+                  </label>
+                  <small class="helper-text">Descobre arquivos adicionados ou excluídos sem precisar reiniciar.</small>
+                </div>
+
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="cfg-merge_media_dirs">
+                    <span class="custom-checkbox"></span>
+                    <span>Agrupar Mídias no Contêiner Raiz (merge_media_dirs)</span>
+                  </label>
+                  <small class="helper-text">Combina todos os diretórios na raiz da biblioteca sem subpastas.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-db_dir">Diretório do Banco de Dados (db_dir)</label>
+                  <input type="text" id="cfg-db_dir" class="input-field" placeholder="/var/cache/minidlna">
+                  <small class="helper-text">Local onde o MiniDLNA armazena o cache SQLite e miniaturas de capas.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-log_dir">Diretório de Logs (log_dir)</label>
+                  <input type="text" id="cfg-log_dir" class="input-field" placeholder="/var/log">
+                  <small class="helper-text">Local onde o arquivo minidlna.log será gravado.</small>
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="cfg-album_art_names">Nomes de Arquivo para Capas de Álbum / Pôsteres</label>
+                  <input type="text" id="cfg-album_art_names" class="input-field">
+                  <small class="helper-text">Separados por barra "/". Ex: Cover.jpg/cover.jpg/Folder.jpg/folder.jpg</small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Group: Recursos e Compatibilidade -->
+            <div class="content-panel">
+              <div class="panel-header">
+                <h3>Compatibilidade e Recursos Avançados</h3>
+                <p class="panel-subtitle">Ajustes para Smart TVs específicas, legendas e regras de conformidade DLNA.</p>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="cfg-enable_subtitles">
+                    <span class="custom-checkbox"></span>
+                    <span>Habilitar Suporte a Legendas por Padrão</span>
+                  </label>
+                  <small class="helper-text">Envia arquivos .srt para reprodutores compatíveis.</small>
+                </div>
+
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="cfg-wide_links">
+                    <span class="custom-checkbox"></span>
+                    <span>Permitir Links Simbólicos Externos (wide_links)</span>
+                  </label>
+                  <small class="helper-text">Permite seguir symlinks apontando para fora dos diretórios configurados.</small>
+                </div>
+
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="cfg-strict_dlna">
+                    <span class="custom-checkbox"></span>
+                    <span>Modo Estrito DLNA (strict_dlna)</span>
+                  </label>
+                  <small class="helper-text">Habilita conformidade rígida às especificações da norma DLNA.</small>
+                </div>
+
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="cfg-enable_tivo">
+                    <span class="custom-checkbox"></span>
+                    <span>Suporte a TiVo (enable_tivo)</span>
+                  </label>
+                  <small class="helper-text">Suporte legado a clientes de hardware TiVo.</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-root_container">Contêiner Raiz Inicial (root_container)</label>
+                  <select id="cfg-root_container" class="select-field">
+                    <option value=".">. (Padrão: Raiz geral com pastas)</option>
+                    <option value="B">B (Browse Directory - Navegação por pastas)</option>
+                    <option value="V">V (Vídeos diretamente)</option>
+                    <option value="M">M (Músicas diretamente)</option>
+                    <option value="P">P (Fotos diretamente)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-max_connections">Máximo de Conexões Simultâneas</label>
+                  <input type="number" id="cfg-max_connections" class="input-field" placeholder="50">
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-notify_interval">Intervalo de Notificação SSDP (segundos)</label>
+                  <input type="number" id="cfg-notify_interval" class="input-field" placeholder="900">
+                </div>
+
+                <div class="form-group">
+                  <label for="cfg-log_level">Nível de Detalhe dos Logs (log_level)</label>
+                  <input type="text" id="cfg-log_level" class="input-field" placeholder="general,artwork,database=warn">
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit bar -->
+            <div class="panel-footer-actions">
+              <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                  <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                <span>Salvar Configurações</span>
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ==================== TAB: CONTROL ==================== -->
+        <section class="tab-pane" id="tab-control">
+          <div class="content-panel">
+            <div class="panel-header">
+              <div>
+                <h3>Controle do Serviço Systemd</h3>
+                <p class="panel-subtitle">Gerencie o ciclo de vida do daemon minidlna no sistema operacional.</p>
+              </div>
+            </div>
+
+            <div class="service-actions-grid">
+              <!-- Start Service -->
+              <div class="service-action-card">
+                <div class="action-card-header">
+                  <div class="action-icon text-success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                  </div>
+                  <div>
+                    <h4>Iniciar Serviço</h4>
+                    <p>Inicia a execução do MiniDLNA no sistema.</p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-success btn-block" id="ctrl-btn-start">Executar Iniciar</button>
+              </div>
+
+              <!-- Restart Service -->
+              <div class="service-action-card">
+                <div class="action-card-header">
+                  <div class="action-icon text-info">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path></svg>
+                  </div>
+                  <div>
+                    <h4>Reiniciar Serviço</h4>
+                    <p>Aplica alterações de configuração reiniciando o daemon.</p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-info btn-block" id="ctrl-btn-restart">Executar Reiniciar</button>
+              </div>
+
+              <!-- Stop Service -->
+              <div class="service-action-card">
+                <div class="action-card-header">
+                  <div class="action-icon text-danger">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg>
+                  </div>
+                  <div>
+                    <h4>Parar Serviço</h4>
+                    <p>Interrompe a transmissão e compartilhamento DLNA.</p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-danger btn-block" id="ctrl-btn-stop">Executar Parar</button>
+              </div>
+
+              <!-- Reindex Service -->
+              <div class="service-action-card">
+                <div class="action-card-header">
+                  <div class="action-icon text-warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                  </div>
+                  <div>
+                    <h4>Forçar Reindexação (-R)</h4>
+                    <p>Reescreve o banco de dados e reescaneia todas as mídias.</p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-warning btn-block" id="ctrl-btn-reindex">Forçar Varredura Completa</button>
+              </div>
+
+              <!-- Enable Boot -->
+              <div class="service-action-card">
+                <div class="action-card-header">
+                  <div class="action-icon text-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                  </div>
+                  <div>
+                    <h4>Iniciar com o Sistema</h4>
+                    <p>Habilita o MiniDLNA para iniciar no boot do Linux.</p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-primary btn-block" id="ctrl-btn-enable">Habilitar no Boot</button>
+              </div>
+
+              <!-- Disable Boot -->
+              <div class="service-action-card">
+                <div class="action-card-header">
+                  <div class="action-icon text-muted">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                  </div>
+                  <div>
+                    <h4>Desabilitar no Boot</h4>
+                    <p>Não inicia automaticamente ao ligar o computador.</p>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-block" id="ctrl-btn-disable">Desabilitar no Boot</button>
+              </div>
+            </div>
+
+            <!-- Command Output Terminal -->
+            <div class="control-output-box">
+              <h4>Saída do Comando</h4>
+              <pre class="terminal-view terminal-sm" id="control-output-text">Nenhuma ação executada ainda.</pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB: LOGS ==================== -->
+        <section class="tab-pane" id="tab-logs">
+          <div class="content-panel terminal-panel">
+            <div class="panel-header terminal-header">
+              <div class="terminal-title-group">
+                <div class="terminal-dots">
+                  <span class="dot dot-red"></span>
+                  <span class="dot dot-yellow"></span>
+                  <span class="dot dot-green"></span>
+                </div>
+                <h3>Terminal de Logs do MiniDLNA (journalctl)</h3>
+              </div>
+              <div class="terminal-controls">
+                <input type="text" id="log-filter-input" class="input-field input-field-sm" placeholder="Filtrar logs...">
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-copy-logs" title="Copiar logs para a área de transferência">Copiar</button>
+                <button type="button" class="btn btn-secondary btn-sm" id="btn-refresh-logs" title="Atualizar registros">Recarregar</button>
+              </div>
+            </div>
+
+            <div class="terminal-body" id="full-terminal-body">
+              <pre class="terminal-code" id="terminal-log-output">Carregando logs...</pre>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: File Browser -->
+  <div class="modal-overlay" id="folder-browser-modal" style="display: none;">
+    <div class="modal-box modal-lg">
+      <div class="modal-header">
+        <h3>Explorar Diretórios do Sistema</h3>
+        <button type="button" class="btn-close-modal" id="btn-close-browser">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="browser-breadcrumb">
+          <span class="breadcrumb-label">Caminho atual:</span>
+          <code class="breadcrumb-path" id="browser-current-path">/</code>
+        </div>
+        <div class="browser-actions-bar">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-browser-up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <span>Subir nível</span>
+          </button>
+          <span class="browser-help">Clique duas vezes para abrir uma subpasta.</span>
+        </div>
+        <div class="browser-list-container" id="browser-dirs-list">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-browser">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-select-current-dir">Selecionar esta pasta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
